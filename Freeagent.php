@@ -33,7 +33,8 @@ class Freeagent {
     
     // debug mode
     private $debug = false;
-        
+    private $headers = array();
+
     // default constructor
     function __construct($clientId, $clientSecret, $sandbox=false){
     
@@ -48,6 +49,35 @@ class Freeagent {
 
     }
     
+    public function getHeader($header) {
+        if (!empty($this->headers[$header])) {
+            return $this->headers[$header];
+        } else {
+            return false;
+        }
+    }
+
+    public function getLinkHeader() {
+        $link = $this->getHeader('Link');
+        if (!$link) {
+            return false;
+        }
+
+        $links = explode(',', $link);
+
+        $result = [];
+
+        foreach ($links as $link) {
+            $matches = [];
+            if (preg_match("/<([^>]+)>; rel\='([^\']+)'/", $link, $matches)) {
+                $result[$matches[2]] = $matches[1];
+            }
+        }
+
+        return $result;
+    }
+
+
     // pass off to oauth authorise url
     public function getAuthoriseURL($callback){
             
@@ -72,7 +102,7 @@ class Freeagent {
         
         // call oauth
         $result = $this->call('', 'oauth', $params);
-        
+
         // Save accessToken
         $this->accessToken = $result->access_token;
     
@@ -131,8 +161,6 @@ class Freeagent {
 		
 		foreach ($fields as $field){
 			if (preg_match('/([^:]+): (.+)/m', $field, $match)){
-				$match[1] = preg_replace_callback('/(?<=^|[\x09\x20\x2D])./',
-                    create_function ('$matches', 'return strtoupper("\0");'), strtolower(trim($match[1])));
 				if (isset($retVal[$match[1]])){
 					$retVal[$match[1]] = array($retVal[$match[1]], $match[2]);
 				} else {
