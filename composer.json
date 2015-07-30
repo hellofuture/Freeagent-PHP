@@ -1,5 +1,5 @@
 {
-    "name": "thoughtco/Freeagent-PHP",
+    "name": "hellofuture/Freeagent-PHP",
     "description": "PHP wrapper for the Freeagent API",
     "require": {
         "php": ">=5.3.0"
